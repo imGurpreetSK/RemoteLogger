@@ -10,6 +10,9 @@ android {
     versionCode 1
     versionName "0.0.1"
 
+    buildConfigField "int", "DATABASE_VERSION", "1"
+    buildConfigField "String", "DATABASE_NAME", "\"RemoteLoggerDb\""
+
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
