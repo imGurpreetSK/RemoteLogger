@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
+import com.gurpreetsk.remotelogger.internal.logError
+import com.gurpreetsk.remotelogger.internal.logInfo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -55,9 +57,9 @@ class SqliteRemoteLogsStorage(
                 + stackTrace + " TEXT"
                 + ");"
         )
+        logInfo("SqliteRemoteLogsStorage", "$databaseName created")
       } catch (e: Exception) {
-        // TODO(gs) - Log only if variant is DEBUG
-        Log.e("SqliteRemoteLogsStorage", "Exception occurred while creating remote logging database $databaseName", e)
+        logError("SqliteRemoteLogsStorage", "Exception occurred while creating remote logging database $databaseName", e)
       }
     }
   }
@@ -89,11 +91,12 @@ class SqliteRemoteLogsStorage(
       try {
         if (::database.isInitialized) {
           database.insert(tableName, null, values)
+          logInfo("SqliteRemoteLogsStorage", "$values inserted!")
         } else {
-          Log.e("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!")
+          logError("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!", null)
         }
       } catch (e: Exception) {
-        Log.e("SqliteRemoteLogsStorage", "Exception occurred while inserting log into $tableName", e)
+        logError("SqliteRemoteLogsStorage", "Exception occurred while inserting log into $tableName", e)
       }
     }
   }
@@ -114,11 +117,11 @@ class SqliteRemoteLogsStorage(
       try {
         DatabaseUtils.queryNumEntries(database, tableName)
       } catch (e: Exception) {
-        Log.e("SqliteRemoteLogsStorage", "Exception occurred while fetching logs count from $tableName", e)
+        logError("SqliteRemoteLogsStorage", "Exception occurred while fetching logs count from $tableName", e)
         super.getCount()
       }
     } else {
-      Log.e("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!")
+      logError("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!", null)
       super.getCount()
     }
   }
