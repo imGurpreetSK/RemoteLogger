@@ -101,7 +101,7 @@ class SqliteRemoteLogsStorage(
     }
   }
 
-  override fun getLogs(): List<RemoteLog> {
+  override suspend fun getLogs(): List<RemoteLog> {
     check(::database.isInitialized)
     val deviceLogList = mutableListOf<RemoteLog>()
 

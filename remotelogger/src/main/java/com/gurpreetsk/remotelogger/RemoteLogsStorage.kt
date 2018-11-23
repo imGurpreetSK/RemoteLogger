@@ -11,7 +11,10 @@ interface RemoteLogsStorage {
    */
   fun insertLog(priorityLevel: String, tag: String, log: String, throwable: Throwable?)
 
-  fun getLogs(): List<RemoteLog>
+  /**
+   * Get all the logs present in the storage.
+   */
+  suspend fun getLogs(): List<RemoteLog>
 
   /**
    * Delete a single log with the given [id] from the storage
