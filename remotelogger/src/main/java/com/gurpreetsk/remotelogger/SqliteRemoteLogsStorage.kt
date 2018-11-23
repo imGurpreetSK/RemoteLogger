@@ -20,42 +20,29 @@ class SqliteRemoteLogsStorage(
 ) : SQLiteOpenHelper(context, databaseName, null, databaseVersion), RemoteLogsStorage {
   private lateinit var database: SQLiteDatabase
 
+  private val tableName  = "remote_logs"
+  private val id         = "log_local_id"
+  private val userUUID   = "user_identifier"
+  private val timestamp  = "timestamp"
+  private val osName     = "os_name"
+  private val osVersion  = "os_version"
+  private val appVersion = "app_version"
+  private val logTag     = "log_tag"
+  private val logLevel   = "log_level"
+  private val message    = "message"
+  private val stackTrace = "stack_trace"
+
   override fun setup() {
     GlobalScope.launch {
       database = writableDatabase
     }
   }
 
-  private val tableName: String = "remote-logs"
-  private val id: String = "log-local-id"
-  private val userUUID: String = "user-identifier"
-  private val timestamp: String = "timestamp"
-  private val osName: String = "os-name"
-  private val osVersion: String = "os-version"
-  private val appVersion: String = "app-version"
-  private val logTag: String = "log-tag"
-  private val logLevel: String = "log-level"
-  private val message: String = "message"
-  private val stackTrace: String = "stack-trace"
-
   override fun onCreate(db: SQLiteDatabase) {
     GlobalScope.launch {
       try {
         db.execSQL(
-            "CREATE TABLE IF NOT EXISTS "
-                + tableName
-                + " ("
-                + id + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + userUUID + " TEXT "
-                + timestamp + " INTEGER "
-                + osName + " TEXT "
-                + osVersion + " TEXT "
-                + appVersion + " TEXT "
-                + logTag + " TEXT "
-                + logLevel + " TEXT "
-                + message + " TEXT "
-                + stackTrace + " TEXT"
-                + ");"
+            "CREATE TABLE IF NOT EXISTS $tableName ($id INTEGER PRIMARY KEY AUTOINCREMENT, $userUUID TEXT, $timestamp INTEGER, $osName TEXT, $osVersion TEXT, $appVersion TEXT, $logTag TEXT, $logLevel TEXT, $message TEXT, $stackTrace TEXT);"
         )
         logInfo("SqliteRemoteLogsStorage", "$databaseName created")
       } catch (e: Exception) {
