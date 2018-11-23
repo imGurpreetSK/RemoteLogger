@@ -3,7 +3,6 @@ package com.gurpreetsk.remotelogger
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
-import com.gurpreetsk.remotelogger.internal.logError
 import io.hypertrack.smart_scheduler.Job.Builder
 import io.hypertrack.smart_scheduler.Job.NetworkType
 import io.hypertrack.smart_scheduler.Job.Type
@@ -18,6 +17,15 @@ object RemoteLogger {
   private lateinit var storageType: RemoteLogsStorage
   private const val WTF: Int = 7447
 
+  /**
+   * Method to initialise the remote logging library.
+   * This method should be called before calling any other methods.
+   *
+   * @param url The remote url to send the logs to.
+   * API 28 & above require `https://` scheme. See https://developer.android.com/training/articles/security-config#CleartextTrafficPermitted for more info.
+   * @param storageType The storage type where logs are stored.
+   * @param jobIntervalMillis The time period after which log upload job should be re-run.
+   */
   fun initialize(
       context: Context,
       url: String,
@@ -28,7 +36,6 @@ object RemoteLogger {
     storageType.setup()
         .also {
           this.storageType = storageType
-
           storeUuidAndRemoteUrlToPreferences(context, userUniqueIdentifier, url)
         }
         .also { schedulePeriodicJob(storageType, jobIntervalMillis, context) }
@@ -134,7 +141,7 @@ object RemoteLogger {
         .addJob(job)
 
     if (!jobCreatedSuccessfully) {
-      logError("RemoteLogger", "Job creation failed, your logs will not be synced", null)
+      Log.e("RemoteLogger", "Job creation failed, your logs will not be synced.", null)
     }
   }
 
