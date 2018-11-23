@@ -101,6 +101,47 @@ class SqliteRemoteLogsStorage(
     }
   }
 
+  override fun getLogs(): List<RemoteLog> {
+    check(::database.isInitialized)
+    val deviceLogList = mutableListOf<RemoteLog>()
+
+    val cursor = database.query(tableName, null, null, null, null, null, null, null)
+    if (cursor == null || cursor.isClosed) {
+      logInfo("SqliteRemoteLogsStorage", "Cursor is either null or closed")
+      return emptyList()
+    }
+
+    try {
+      if (cursor.moveToFirst()) {
+        do {
+          if (cursor.isClosed) {
+            break
+          }
+
+          deviceLogList.add(RemoteLog(
+              cursor.getInt(0),
+              cursor.getString(1),
+              cursor.getLong(2),
+              cursor.getString(3),
+              cursor.getString(4),
+              cursor.getString(5),
+              cursor.getString(6),
+              cursor.getString(7),
+              cursor.getString(8),
+              cursor.getString(9)
+          ))
+        } while (cursor.moveToNext())
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      logError("SqliteRemoteLogsStorage", "Exception occurred while reading logs from $tableName", e)
+    } finally {
+      cursor.close()
+    }
+
+    return deviceLogList
+  }
+
   override fun deleteLog(logId: Long) {
     GlobalScope.launch {
       database.delete(tableName, "$id = ?", arrayOf(logId.toString()))
