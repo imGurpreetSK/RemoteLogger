@@ -3,9 +3,16 @@ package com.gurpreetsk.remotelogger
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
+import com.gurpreetsk.remotelogger.internal.logError
+import io.hypertrack.smart_scheduler.Job.Builder
+import io.hypertrack.smart_scheduler.Job.NetworkType
+import io.hypertrack.smart_scheduler.Job.Type
+import io.hypertrack.smart_scheduler.SmartScheduler
 
-val REMOTE_LOGGER_USER_UUID = "REMOTE_LOGGER_USER_UUID"
-val REMOTE_LOGGER_URL = "REMOTE_LOGGER_URL"
+private const val REMOTE_LOGGER_URL    = "REMOTE_LOGGER_URL"
+private const val DEFAULT_JOB_INTERVAL = 6 * 60 * 60 * 1000L // 6 hours
+
+const val REMOTE_LOGGER_USER_UUID = "REMOTE_LOGGER_USER_UUID"
 
 object RemoteLogger {
   private lateinit var storageType: RemoteLogsStorage
@@ -15,18 +22,16 @@ object RemoteLogger {
       context: Context,
       url: String,
       userUniqueIdentifier: String,
-      storageType: RemoteLogsStorage = SqliteRemoteLogsStorage(context, BuildConfig.DATABASE_NAME, BuildConfig.DATABASE_VERSION)
+      storageType: RemoteLogsStorage = SqliteRemoteLogsStorage(context, BuildConfig.DATABASE_NAME, BuildConfig.DATABASE_VERSION),
+      jobIntervalMillis: Long = DEFAULT_JOB_INTERVAL
   ) {
-    storageType.setup().also {
-      this.storageType = storageType
+    storageType.setup()
+        .also {
+          this.storageType = storageType
 
-      PreferenceManager
-          .getDefaultSharedPreferences(context)
-          .edit()
-          .putString(REMOTE_LOGGER_USER_UUID, userUniqueIdentifier)
-          .putString(REMOTE_LOGGER_URL, url)
-          .apply()
-    }
+          storeUuidAndRemoteUrlToPreferences(context, userUniqueIdentifier, url)
+        }
+        .also { schedulePeriodicJob(storageType, jobIntervalMillis, context) }
   }
 
   /**
@@ -98,6 +103,39 @@ object RemoteLogger {
   fun wtf(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(WTF), tag, message, throwable)
+  }
+
+  private fun storeUuidAndRemoteUrlToPreferences(context: Context, userUniqueIdentifier: String, url: String) {
+    PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .edit()
+        .putString(REMOTE_LOGGER_USER_UUID, userUniqueIdentifier)
+        .putString(REMOTE_LOGGER_URL, url)
+        .apply()
+  }
+
+  private fun schedulePeriodicJob(storageType: RemoteLogsStorage, jobIntervalMillis: Long, context: Context) {
+    val periodicTaskTag = "REMOTE-LOGGER-PERIODIC-JOB"
+
+    val callback = SmartScheduler.JobScheduledCallback { jobContext, _ ->
+      RemoteJobExecutor().execute(
+          PreferenceManager.getDefaultSharedPreferences(jobContext).getString(REMOTE_LOGGER_URL, "")
+              ?: "",
+          storageType
+      )
+    }
+
+    val job = Builder(1, callback, Type.JOB_TYPE_PERIODIC_TASK, periodicTaskTag)
+        .setPeriodic(jobIntervalMillis)
+        .setRequiredNetworkType(NetworkType.NETWORK_TYPE_CONNECTED)
+        .build()
+
+    val jobCreatedSuccessfully = SmartScheduler.getInstance(context)
+        .addJob(job)
+
+    if (!jobCreatedSuccessfully) {
+      logError("RemoteLogger", "Job creation failed, your logs will not be synced", null)
+    }
   }
 
   private fun getLogPriorityLevel(messageLogLevel: Int): String =
