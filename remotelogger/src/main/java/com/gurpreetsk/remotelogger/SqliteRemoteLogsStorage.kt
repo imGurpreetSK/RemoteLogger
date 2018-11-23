@@ -75,15 +75,15 @@ class SqliteRemoteLogsStorage(
             }
           }
 
-      try {
-        if (::database.isInitialized) {
+      if (::database.isInitialized) {
+        try {
           database.insert(tableName, null, values)
           logInfo("SqliteRemoteLogsStorage", "$values inserted!")
-        } else {
-          logError("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!", null)
+        } catch (e: Exception) {
+          logError("SqliteRemoteLogsStorage", "Exception while inserting into $tableName!", null)
         }
-      } catch (e: Exception) {
-        logError("SqliteRemoteLogsStorage", "Exception occurred while inserting log into $tableName", e)
+      } else {
+        logError("SqliteRemoteLogsStorage", "DATABASE IS UNINITIALISED!", null)
       }
     }
   }
