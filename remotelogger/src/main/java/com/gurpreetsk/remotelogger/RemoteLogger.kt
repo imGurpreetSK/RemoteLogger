@@ -34,7 +34,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun v(tag: String, message: String, throwable: Throwable?) {
+  fun v(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.VERBOSE), tag, message, throwable)
   }
@@ -44,7 +44,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun d(tag: String, message: String, throwable: Throwable?) {
+  fun d(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.DEBUG), tag, message, throwable)
   }
@@ -54,7 +54,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun i(tag: String, message: String, throwable: Throwable?) {
+  fun i(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.INFO), tag, message, throwable)
   }
@@ -64,7 +64,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun w(tag: String, message: String, throwable: Throwable?) {
+  fun w(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.WARN), tag, message, throwable)
   }
@@ -74,7 +74,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun e(tag: String, message: String, throwable: Throwable?) {
+  fun e(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.ERROR), tag, message, throwable)
   }
@@ -85,7 +85,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun a(tag: String, message: String, throwable: Throwable?) {
+  fun a(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(Log.ASSERT), tag, message, throwable)
   }
@@ -95,7 +95,7 @@ object RemoteLogger {
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
    */
-  fun wtf(tag: String, message: String, throwable: Throwable?) {
+  fun wtf(tag: String, message: String, throwable: Throwable? = null) {
     check(::storageType.isInitialized)
     storageType.insertLog(getLogPriorityLevel(WTF), tag, message, throwable)
   }
