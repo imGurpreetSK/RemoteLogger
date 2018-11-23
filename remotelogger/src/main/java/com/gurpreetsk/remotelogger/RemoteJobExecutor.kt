@@ -19,8 +19,11 @@ class RemoteJobExecutor {
   ) {
     try {
       GlobalScope.launch {
-        makeRequest(url, async { storageType.getLogs() }.await())
-            .also { storageType.purge() }
+        val logs = async { storageType.getLogs() }.await()
+        if (logs.isNotEmpty()) {
+          makeRequest(url, logs)
+              .also { storageType.purge() }
+        }
       }
     } catch (e: Exception) {
       logError("RemoteJobExecutor", "Remote network call failed.", e)
