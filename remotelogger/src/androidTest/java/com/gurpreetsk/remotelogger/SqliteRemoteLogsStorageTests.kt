@@ -1,10 +1,12 @@
 package com.gurpreetsk.remotelogger
 
+import android.content.ContentValues
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -55,6 +57,109 @@ import org.junit.runner.RunWith
     assertThat(DatabaseUtils.queryNumEntries(database, tableName))
         .isEqualTo(0)
   }
+
+  @Test fun getLogsFromDatabase() {
+    // Setup
+    val values: ContentValues = getContentValues()
+
+    // Act
+    storage.setup()
+    database.insert(tableName, null, values)
+
+    val logs = runBlocking {
+      storage.getLogs()
+    }
+
+    // Assert
+    val expectedLogs = listOf(
+        RemoteLog(
+            1,
+            "Gurpreet",
+            123456789,
+            "ANDROID",
+            "28",
+            "1",
+            "DEBUG",
+            "DEBUG",
+            "Room is so much better :/",
+            ""
+        )
+    )
+    assertThat(logs)
+        .isEqualTo(expectedLogs)
+  }
+
+  @Test fun getEmptyListFromDatabaseIfNoLogsArePresent() {
+    // Act
+    storage.setup()
+
+    val logs = runBlocking {
+      storage.getLogs()
+    }
+
+    // Assert
+    assertThat(logs)
+        .isEqualTo(emptyList<RemoteLog>())
+  }
+
+  @Test fun deleteLogWithGivenId() {
+    // Setup
+    storage.setup()
+    val values: ContentValues = getContentValues()
+    database.insert(tableName, null, values)
+
+    // Act
+    storage.deleteLog(1)
+
+    // Assert
+    val logs = runBlocking { storage.getLogs() }
+    assertThat(logs)
+        .isEqualTo(emptyList<RemoteLog>())
+  }
+
+  @Test fun deleteAllDatabaseContents() {
+    // Setup
+    storage.setup()
+    val values: ContentValues = getContentValues()
+    database.insert(tableName, null, values)
+
+    // Act
+    storage.purge()
+
+    // Assert
+    val logs = runBlocking { storage.getLogs() }
+    assertThat(logs)
+        .isEqualTo(emptyList<RemoteLog>())
+  }
+
+  @Test fun getTotalLogsPresentInDatabase() {
+    // Setup
+    storage.setup()
+    val values: ContentValues = getContentValues()
+    database.insert(tableName, null, values)
+
+    // Act
+    val count = storage.getCount()
+
+    // Assert
+    assertThat(count).isEqualTo(1)
+  }
+
+  private fun getContentValues(): ContentValues = ContentValues()
+      .also {
+        with(it) {
+          put(id, 1)
+          put(userUUID, "Gurpreet")
+          put(timestamp, "123456789")
+          put(osName, "ANDROID")
+          put(osVersion, 28)
+          put(appVersion, 1)
+          put(logTag, "DEBUG")
+          put(logLevel, "DEBUG")
+          put(message, "Room is so much better :/")
+          put(stackTrace, "")
+        }
+      }
 
   @After fun teardown() {
     database.delete(tableName, null, null)

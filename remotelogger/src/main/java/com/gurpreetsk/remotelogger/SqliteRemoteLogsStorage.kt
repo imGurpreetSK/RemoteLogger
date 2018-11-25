@@ -131,7 +131,11 @@ class SqliteRemoteLogsStorage(
 
   override fun deleteLog(logId: Long) {
     GlobalScope.launch {
-      database.delete(tableName, "$id = ?", arrayOf(logId.toString()))
+      try {
+        database.delete(tableName, "$id = ?", arrayOf(logId.toString()))
+      } catch (e: Exception) {
+        logError("SqliteRemoteLogsStorage", "Log with id $logId not present in $tableName", e)
+      }
     }
   }
 
