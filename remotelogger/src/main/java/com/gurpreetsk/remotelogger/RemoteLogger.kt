@@ -125,7 +125,7 @@ object RemoteLogger {
     val periodicTaskTag = "REMOTE-LOGGER-PERIODIC-JOB"
 
     val callback = SmartScheduler.JobScheduledCallback { jobContext, _ ->
-      RemoteJobExecutor().execute(
+      RemoteJobExecutor.execute(
           PreferenceManager.getDefaultSharedPreferences(jobContext).getString(REMOTE_LOGGER_URL, "")
               ?: "",
           storageType

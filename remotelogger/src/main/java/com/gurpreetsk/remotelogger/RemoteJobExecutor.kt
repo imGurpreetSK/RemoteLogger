@@ -12,7 +12,7 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 
-class RemoteJobExecutor {
+object RemoteJobExecutor {
   fun execute(
       url: String,
       storageType: RemoteLogsStorage
