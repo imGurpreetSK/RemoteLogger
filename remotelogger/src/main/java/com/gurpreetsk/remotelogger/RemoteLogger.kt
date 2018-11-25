@@ -9,7 +9,7 @@ import io.hypertrack.smart_scheduler.Job.Type
 import io.hypertrack.smart_scheduler.SmartScheduler
 
 private const val REMOTE_LOGGER_URL    = "REMOTE_LOGGER_URL"
-private const val DEFAULT_JOB_INTERVAL = 6 * 60 * 60 * 1000L // 6 hours
+private const val DEFAULT_JOB_INTERVAL = 12 * 60 * 60 * 1000L // 12 hours
 
 const val REMOTE_LOGGER_USER_UUID = "REMOTE_LOGGER_USER_UUID"
 
