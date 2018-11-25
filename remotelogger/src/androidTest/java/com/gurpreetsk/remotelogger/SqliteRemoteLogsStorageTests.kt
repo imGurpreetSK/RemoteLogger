@@ -30,7 +30,6 @@ import org.junit.runner.RunWith
     val databaseName = "RemoteLoggerDb"
     val context  = InstrumentationRegistry.getContext()
     storage = SqliteRemoteLogsStorage(context, databaseName, 1)
-    storage.setup()
 
     database = storage.writableDatabase
     database.execSQL(
@@ -40,11 +39,21 @@ import org.junit.runner.RunWith
 
   @Test fun insertLogIntoTable() {
     // Act
+    storage.setup()
     storage.insertLog("DEBUG", "DEBUG", "Room is so much better :/", null)
 
     // Assert
     assertThat(DatabaseUtils.queryNumEntries(database, tableName))
         .isEqualTo(1)
+  }
+
+  @Test fun neverInsertLogIntoTableIfDatabaseIsNotInitialised() {
+    // Act
+    storage.insertLog("DEBUG", "DEBUG", "Room is so much better :/", null)
+
+    // Assert
+    assertThat(DatabaseUtils.queryNumEntries(database, tableName))
+        .isEqualTo(0)
   }
 
   @After fun teardown() {
