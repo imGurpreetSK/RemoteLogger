@@ -1,9 +1,12 @@
 package com.gurpreetsk.remotelogger
 
 import android.database.DatabaseUtils
+import android.database.sqlite.SQLiteDatabase
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -20,22 +23,31 @@ import org.junit.runner.RunWith
   private val message    = "message"
   private val stackTrace = "stack_trace"
 
-  @Test fun insertLogIntoTable() {
-    // Setup
+  private lateinit var storage: SqliteRemoteLogsStorage
+  private lateinit var database: SQLiteDatabase
+
+  @Before fun setup() {
     val databaseName = "RemoteLoggerDb"
     val context  = InstrumentationRegistry.getContext()
-    val storage  = SqliteRemoteLogsStorage(context, databaseName, 1)
+    storage = SqliteRemoteLogsStorage(context, databaseName, 1)
     storage.setup()
-    val database = storage.writableDatabase
+
+    database = storage.writableDatabase
     database.execSQL(
         "CREATE TABLE IF NOT EXISTS $tableName ($id INTEGER PRIMARY KEY AUTOINCREMENT, $userUUID TEXT, $timestamp INTEGER, $osName TEXT, $osVersion TEXT, $appVersion TEXT, $logTag TEXT, $logLevel TEXT, $message TEXT, $stackTrace TEXT);"
     )
+  }
 
+  @Test fun insertLogIntoTable() {
     // Act
     storage.insertLog("DEBUG", "DEBUG", "Room is so much better :/", null)
 
     // Assert
     assertThat(DatabaseUtils.queryNumEntries(database, tableName))
         .isEqualTo(1)
+  }
+
+  @After fun teardown() {
+    database.delete(tableName, null, null)
   }
 }
