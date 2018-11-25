@@ -12,6 +12,10 @@ class RemoteLoggingApplication : Application() {
   }
 
   private fun setupRemoteLogging() {
-    RemoteLogger.initialize(this, "some-url", "Gurpreet")
+    RemoteLogger.initialize(
+        this,
+        "https://something.ngrok.io", // See https://ngrok.com
+        "Gurpreet"
+    )
   }
 }
