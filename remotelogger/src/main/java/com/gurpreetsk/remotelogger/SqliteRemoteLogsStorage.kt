@@ -10,7 +10,8 @@ import android.preference.PreferenceManager
 import android.util.Log
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SqliteRemoteLogsStorage(
@@ -33,13 +34,13 @@ class SqliteRemoteLogsStorage(
   private val stackTrace = "stack_trace"
 
   override fun setup() {
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
       database = writableDatabase
     }
   }
 
   override fun onCreate(db: SQLiteDatabase) {
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
       try {
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS $tableName ($id INTEGER PRIMARY KEY AUTOINCREMENT, $userUUID TEXT, $timestamp INTEGER, $osName TEXT, $osVersion TEXT, $appVersion TEXT, $logTag TEXT, $logLevel TEXT, $message TEXT, $stackTrace TEXT);"
@@ -52,14 +53,14 @@ class SqliteRemoteLogsStorage(
   }
 
   override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
       db.execSQL("DROP TABLE IF EXISTS $tableName")
       onCreate(db)
     }
   }
 
   override fun insertLog(priorityLevel: String, tag: String, log: String, throwable: Throwable?) {
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
       val values: ContentValues = ContentValues()
           .also {
             with(it) {
@@ -130,7 +131,7 @@ class SqliteRemoteLogsStorage(
   }
 
   override fun deleteLog(logId: Long) {
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
       try {
         database.delete(tableName, "$id = ?", arrayOf(logId.toString()))
       } catch (e: Exception) {
