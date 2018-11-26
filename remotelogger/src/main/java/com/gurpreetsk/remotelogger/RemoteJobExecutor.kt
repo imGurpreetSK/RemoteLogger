@@ -73,7 +73,7 @@ object RemoteJobExecutor {
       readLine = inputStream.readLine()
     }
 
-    logInfo("RemoteJobExecutor", sb.toString())
+    logInfo("RemoteJobExecutor", "Server response: $sb")
 
     if (urlConnection.responseCode == 200) {
       purge.invoke()
