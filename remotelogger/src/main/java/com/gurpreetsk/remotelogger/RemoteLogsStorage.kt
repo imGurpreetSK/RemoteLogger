@@ -35,4 +35,9 @@ interface RemoteLogsStorage {
   fun getCount(): Long {
     return -1
   }
+
+  /**
+   * Free up any used resources.
+   */
+  fun teardown()
 }

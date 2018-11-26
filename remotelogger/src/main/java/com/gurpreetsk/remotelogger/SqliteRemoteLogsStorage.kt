@@ -157,4 +157,10 @@ class SqliteRemoteLogsStorage(
       super.getCount()
     }
   }
+
+  override fun teardown() {
+    if (::database.isInitialized && database.isOpen) {
+      database.close()
+    }
+  }
 }
