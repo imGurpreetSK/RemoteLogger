@@ -42,6 +42,15 @@ object RemoteLogger {
   }
 
   /**
+   * Method to free up any resources used by the library.
+   */
+  fun teardown() {
+    if (::storageType.isInitialized) {
+      storageType.teardown()
+    }
+  }
+
+  /**
    * Verbose remote log.
    *
    * @throws IllegalStateException if [storageType] is uninitialized.
