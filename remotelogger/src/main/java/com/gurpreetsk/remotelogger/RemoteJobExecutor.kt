@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -53,14 +54,16 @@ object RemoteJobExecutor {
 
     // 3. Make the POST request
     val outputStream = BufferedOutputStream(urlConnection.outputStream)
+    val requestBody  = getRequestBodyJson(logs).toString()
 
     val writer = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
-    writer.write(JSONArray(logs).toString())
+    writer.write(requestBody)
     writer.flush()
     writer.close()
     outputStream.close()
 
     urlConnection.connect()
+    logInfo("RemoteJobExecutor", "Request body to server: $requestBody")
 
     // 4. Get the response
     val inputStream = BufferedReader(InputStreamReader(urlConnection.inputStream))
@@ -78,5 +81,29 @@ object RemoteJobExecutor {
     if (urlConnection.responseCode == 200) {
       purge.invoke()
     }
+  }
+
+  private fun getRequestBodyJson(logs: List<RemoteLog>): JSONObject {
+    val jsonArray = JSONArray()
+    logs.forEach {
+      jsonArray.put(
+          with (JSONObject()) {
+            put("id", it.id)
+            put("userUUID", it.userUUID)
+            put("osName", it.osName)
+            put("osVersion", it.osVersion)
+            put("appVersion", it.appVersion)
+            put("logTag", it.logTag)
+            put("logLevel", it.logLevel)
+            put("message", it.message)
+            put("stacktrace", it.stackTrace)
+          }
+      )
+    }
+
+    val logsJson = JSONObject()
+    logsJson.put("logs", jsonArray)
+
+    return logsJson
   }
 }
