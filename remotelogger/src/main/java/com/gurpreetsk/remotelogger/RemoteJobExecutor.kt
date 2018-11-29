@@ -66,17 +66,21 @@ object RemoteJobExecutor {
     logInfo("RemoteJobExecutor", "Request body to server: $requestBody")
 
     // 4. Get the response
-    val inputStream = BufferedReader(InputStreamReader(urlConnection.inputStream))
+    try {
+      val inputStream = BufferedReader(InputStreamReader(urlConnection.inputStream))
 
-    // Read Server Response
-    val sb = StringBuilder()
-    var readLine = inputStream.readLine()
-    while (readLine != null) {
-      sb.append(readLine + "\n")
-      readLine = inputStream.readLine()
+      // Read Server Response
+      val sb = StringBuilder()
+      var readLine = inputStream.readLine()
+      while (readLine != null) {
+        sb.append(readLine + "\n")
+        readLine = inputStream.readLine()
+      }
+
+      logInfo("RemoteJobExecutor", "Server response: $sb")
+    } catch (e: Exception) {
+      logError("RemoteJobExecutor", "Error getting the server response", e)
     }
-
-    logInfo("RemoteJobExecutor", "Server response: $sb")
 
     if (urlConnection.responseCode == 200) {
       purge.invoke()
