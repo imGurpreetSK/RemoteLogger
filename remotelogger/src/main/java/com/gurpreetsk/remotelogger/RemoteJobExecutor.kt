@@ -38,7 +38,7 @@ object RemoteJobExecutor {
   private fun pushLogsToServer(
       remoteUrl: String,
       logs: List<RemoteLog>,
-      purge: () -> Int
+      purgeLogsStorage: () -> Int
   ) {
     if (remoteUrl.isBlank()) {
       throw MalformedURLException()
@@ -78,12 +78,14 @@ object RemoteJobExecutor {
       }
 
       logInfo("RemoteJobExecutor", "Server response: $sb")
+
+      if (urlConnection.responseCode == 200) {
+        purgeLogsStorage.invoke()
+      } else {
+        inputStream.close()
+      }
     } catch (e: Exception) {
       logError("RemoteJobExecutor", "Error getting the server response", e)
-    }
-
-    if (urlConnection.responseCode == 200) {
-      purge.invoke()
     }
   }
 
