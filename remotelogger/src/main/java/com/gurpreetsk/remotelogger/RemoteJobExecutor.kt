@@ -1,5 +1,6 @@
 package com.gurpreetsk.remotelogger
 
+import com.gurpreetsk.remotelogger.internal.RemoteLog
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo
 import kotlinx.coroutines.GlobalScope

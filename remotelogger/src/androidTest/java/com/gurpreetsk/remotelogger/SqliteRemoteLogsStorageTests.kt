@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.gurpreetsk.remotelogger.internal.RemoteLog
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before

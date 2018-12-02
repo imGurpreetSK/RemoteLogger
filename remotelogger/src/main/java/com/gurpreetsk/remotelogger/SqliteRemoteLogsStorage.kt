@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
+import com.gurpreetsk.remotelogger.internal.RemoteLog
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo
 import kotlinx.coroutines.CoroutineScope

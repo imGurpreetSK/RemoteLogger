@@ -1,4 +1,4 @@
-package com.gurpreetsk.remotelogger
+package com.gurpreetsk.remotelogger.internal
 
 data class RemoteLog(
     val id: Int,

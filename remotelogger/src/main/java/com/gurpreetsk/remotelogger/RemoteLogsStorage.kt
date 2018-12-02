@@ -1,5 +1,7 @@
 package com.gurpreetsk.remotelogger
 
+import com.gurpreetsk.remotelogger.internal.RemoteLog
+
 interface RemoteLogsStorage {
   /**
    * Setup the storage before performing any operations
