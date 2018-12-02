@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
 android {
   compileSdkVersion 28
@@ -8,7 +10,7 @@ android {
     minSdkVersion 14
     targetSdkVersion 28
     versionCode 1
-    versionName "0.0.1"
+    versionName "0.1.0-preview"
 
     buildConfigField "int", "DATABASE_VERSION", "1"
     buildConfigField "String", "DATABASE_NAME", "\"RemoteLoggerDb\""
@@ -50,3 +52,29 @@ dependencies {
   androidTestImplementation "com.google.truth:truth:0.42"
   androidTestImplementation "com.android.support.test:runner:1.0.2"
 }
+
+ext {
+  bintrayRepo = 'RemoteLogger'
+  bintrayName = 'remotelogger'
+
+  publishedGroupId = 'com.gurpreetsk'
+  libraryName      = 'remotelogger'
+  artifact         = 'remotelogger'
+
+  libraryDescription = 'A simple android library to push logs to a remote server.'
+
+  siteUrl = 'https://github.com/gurpreetsk95/remotelogger'
+  gitUrl  = 'https://github.com/gurpreetsk95/remotelogger.git'
+
+  libraryVersion = '0.1.0-preview'
+
+  developerId    = 'gurpreetsk95'
+  developerName  = 'Gurpreet Singh'
+  developerEmail = 'gurpreetsk@hotmail.com'
+
+  licenseName = 'The Apache Software License, Version 2.0'
+  licenseUrl  = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+  allLicenses = ["Apache-2.0"]
+}
+
+apply from: '../gradle/bintray.gradle'
