@@ -136,6 +136,14 @@ object RemoteLogger {
     storageType.insertLog(getLogPriorityLevel(WTF), tag, message, throwable)
   }
 
+  fun setUserIdentifier(context: Context, userIdentifier: String) {
+    PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .edit()
+        .putString(REMOTE_LOGGER_USER_UUID, userIdentifier)
+        .apply()
+  }
+
   private fun storeUuidAndRemoteUrlToPreferences(context: Context, userUniqueIdentifier: String, url: String) {
     PreferenceManager
         .getDefaultSharedPreferences(context)
