@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical"
   >
+
+  <Button
+    android:id="@+id/addLogsButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/log_something"
+    android:layout_gravity="top|center"
+    />
 
   <TextView
     android:id="@+id/dummyTextView"
@@ -13,4 +21,14 @@
     android:layout_gravity="center"
     android:layout_margin="8dp"
     />
-</LinearLayout>
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layout_margin="4dp"
+    android:gravity="center"
+    android:textStyle="bold"
+    android:text="@string/chrome_inspect_tooltip"
+    />
+</FrameLayout>

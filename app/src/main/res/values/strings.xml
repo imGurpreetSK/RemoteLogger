@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">RemoteLogger</string>
+  <string name="app_name">RemoteLogger-Sample</string>
+  <string name="log_something">Log something</string>
+  <string name="chrome_inspect_tooltip">Open `chrome://inspect` in Chrome browser to see database contents.</string>
 </resources>
