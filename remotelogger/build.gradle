@@ -33,12 +33,11 @@ repositories {
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-  // Kotlin
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  // Coroutines
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1"
 
-  // Support dependencies
-  implementation "com.android.support:appcompat-v7:28.0.0"
+  // Kotlin
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   // Smart Scheduler. Size: 151 KB
   implementation 'io.hypertrack:smart-scheduler:0.0.13'
