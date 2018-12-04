@@ -20,11 +20,12 @@ Then, include the dependencies in your module's build script.
       implementation 'com.gurpreetsk:remotelogger:(latest-version)'
     }
 
-where {latest version} corresponds to published version in [![Download](https://api.bintray.com/packages/gurpreetsk95/RemoteLogger/remotelogger/images/download.svg)](https://bintray.com/gurpreetsk95/RemoteLogger/remotelogger/_latestVersion)
+where `(latest version)` corresponds to published version in [![Download](https://api.bintray.com/packages/gurpreetsk95/RemoteLogger/remotelogger/images/download.svg)](https://bintray.com/gurpreetsk95/RemoteLogger/remotelogger/_latestVersion)
 
 Setup
 ---------------------
 You should initialize the library as early as possible in application lifecycle. The application `onCreate` might be the most logical choice.
+
 This is done using the `initialize(context: Context, url: String, userUniqueIdentifier: String)` method, which requires context, the remote url to which the logs need to be sent to, and an identifier to uniquely identify the user.
 
 Logs can be captured using methods provided in `RemoteLogger` class (in a similar way as android Log class).
