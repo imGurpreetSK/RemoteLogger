@@ -30,7 +30,8 @@ class RemoteLoggingApplication : Application() {
     RemoteLogger.initialize(
         this,
         "https://something.ngrok.io", // See https://ngrok.com
-        "Gurpreet"
+        "Gurpreet",
+        jobIntervalMillis = 30 * 1000L // 30 seconds
     )
   }
 }
