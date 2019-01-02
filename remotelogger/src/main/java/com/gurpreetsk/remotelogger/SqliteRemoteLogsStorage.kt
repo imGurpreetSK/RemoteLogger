@@ -84,7 +84,7 @@ class SqliteRemoteLogsStorage(
               put(timestamp, System.currentTimeMillis())
               put(osName, "ANDROID")
               put(osVersion, Build.VERSION.SDK_INT)
-              put(appVersion, BuildConfig.VERSION_CODE)
+              put(appVersion, "${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}]")
               put(logTag, tag)
               put(logLevel, priorityLevel)
               put(message, log)
