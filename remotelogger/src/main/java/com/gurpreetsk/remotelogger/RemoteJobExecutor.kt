@@ -18,9 +18,10 @@ package com.gurpreetsk.remotelogger
 import com.gurpreetsk.remotelogger.internal.RemoteLog
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedOutputStream
@@ -40,7 +41,7 @@ object RemoteJobExecutor {
   ) {
     try {
       GlobalScope.launch {
-        val logs = async { storageType.getLogs() }.await()
+        val logs: List<RemoteLog> = withContext(Dispatchers.Default) { storageType.getLogs() }
         if (logs.isNotEmpty()) {
           pushLogsToServer(url, logs) { storageType.purge() }
         }
@@ -86,17 +87,17 @@ object RemoteJobExecutor {
       val inputStream = BufferedReader(InputStreamReader(urlConnection.inputStream))
 
       // Read Server Response
-      val sb = StringBuilder()
+      val builder = StringBuilder()
       var readLine = inputStream.readLine()
       while (readLine != null) {
-        sb.append(readLine + "\n")
+        builder.append(readLine + "\n")
         readLine = inputStream.readLine()
       }
 
-      logInfo("RemoteJobExecutor", "Server response: $sb")
+      logInfo("RemoteJobExecutor", "Server response: $builder")
 
       if (urlConnection.responseCode == 200) {
-        purgeLogsStorage.invoke()
+        purgeLogsStorage()
       } else {
         inputStream.close()
       }
