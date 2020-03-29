@@ -1,22 +1,24 @@
 ext {
     versions = [
-            coroutines    : "1.3.0",
-            smartScheduler: "0.0.13",
-            junit         : "4.13",
-            truth         : "1.0.1",
-            mockito       : "2.2.0",
-            testRunner    : "1.0.2",
+            coroutines        : "1.3.0",
+            smartScheduler    : "0.0.13",
+            junit             : "4.13",
+            truth             : "1.0.1",
+            mockito           : "2.2.0",
+            testRunner        : "1.0.2",
+            androidAnnotations: "1.1.0",
     ]
 
     libraries = [
-            coroutinesCore: "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
-            smartScheduler: "io.hypertrack:smart-scheduler:${versions.smartScheduler}",
+            coroutinesCore    : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
+            smartScheduler    : "io.hypertrack:smart-scheduler:${versions.smartScheduler}",
+            androidAnnotations: "androidx.annotation:annotation:${versions.androidAnnotations}"
     ]
 
     testing = [
             junit     : "junit:junit:${versions.junit}",
             truth     : "com.google.truth:truth:${versions.truth}",
             mockito   : "com.nhaarman.mockitokotlin2:mockito-kotlin:${versions.mockito}",
-            testRunner: "com.android.support.test:runner:${versions.testRunner}",
+            testRunner: 'androidx.test.ext:junit:1.1.1',
     ]
 }

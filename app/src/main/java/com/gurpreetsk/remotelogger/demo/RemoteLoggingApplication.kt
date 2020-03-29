@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gurpreetsk.remotelogger
+package com.gurpreetsk.remotelogger.demo
 
 import android.app.Application
 import com.facebook.stetho.Stetho
+import com.gurpreetsk.remotelogger.Duration
+import com.gurpreetsk.remotelogger.RemoteLogger
+import java.util.concurrent.TimeUnit
 
 class RemoteLoggingApplication : Application() {
-  override fun onCreate() {
-    super.onCreate()
-    Stetho.initializeWithDefaults(this)
+    override fun onCreate() {
+        super.onCreate()
+        Stetho.initializeWithDefaults(this)
 
-    setupRemoteLogging()
-  }
+        setupRemoteLogging()
+    }
 
-  private fun setupRemoteLogging() {
-    RemoteLogger.initialize(
-        this,
-        "https://something.ngrok.io", // See https://ngrok.com
-        "Gurpreet",
-        jobIntervalMillis = 30 * 1000L // 30 seconds
-    )
-  }
+    private fun setupRemoteLogging() {
+      RemoteLogger.initialize(
+              this,
+              "https://something.ngrok.io", // See https://ngrok.com
+              "Gurpreet",
+              jobInterval = Duration(20, TimeUnit.SECONDS)
+      )
+    }
 }

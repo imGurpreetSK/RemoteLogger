@@ -19,7 +19,7 @@ android {
         buildConfigField "int", "DATABASE_VERSION", "1"
         buildConfigField "String", "DATABASE_NAME", "\"RemoteLoggerDb\""
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -43,6 +43,7 @@ dependencies {
 
     // Smart Scheduler. Size: 151 KB
     implementation libraries.smartScheduler
+    implementation libraries.androidAnnotations
 
     // Unit testing dependencies
     testImplementation testing.junit

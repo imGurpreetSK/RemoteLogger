@@ -16,177 +16,221 @@
 package com.gurpreetsk.remotelogger
 
 import android.content.Context
-import android.preference.PreferenceManager
 import android.util.Log
-import io.hypertrack.smart_scheduler.Job.Builder
-import io.hypertrack.smart_scheduler.Job.NetworkType
-import io.hypertrack.smart_scheduler.Job.Type
+import com.gurpreetsk.remotelogger.internal.SettingsStore
+import com.gurpreetsk.remotelogger.internal.SettingsStoreImpl
+import io.hypertrack.smart_scheduler.Job.*
 import io.hypertrack.smart_scheduler.SmartScheduler
+import java.util.concurrent.TimeUnit
 
-private const val REMOTE_LOGGER_URL    = "REMOTE_LOGGER_URL"
-private const val DEFAULT_JOB_INTERVAL = 12 * 60 * 60 * 1000L // 12 hours
+private const val REMOTE_LOGGER_URL = "REMOTE_LOGGER_URL"
+private val DEFAULT_JOB_INTERVAL = Duration(12, TimeUnit.HOURS)
+private const val WTF: Int = 7447
 
 const val REMOTE_LOGGER_USER_UUID = "REMOTE_LOGGER_USER_UUID"
 
 object RemoteLogger {
-  private lateinit var storageType: RemoteLogsStorage
-  private const val WTF: Int = 7447
 
-  /**
-   * Method to initialise the remote logging library.
-   * This method should be called before calling any other methods.
-   *
-   * @param url The remote url to send the logs to.
-   * API 28 & above require `https://` scheme. See https://developer.android.com/training/articles/security-config#CleartextTrafficPermitted for more info.
-   * @param storageType The storage type where logs are stored.
-   * @param jobIntervalMillis The time period after which log upload job should be re-run.
-   */
-  fun initialize(
-      context: Context,
-      url: String,
-      userUniqueIdentifier: String,
-      storageType: RemoteLogsStorage = SqliteRemoteLogsStorage(context, BuildConfig.DATABASE_NAME, BuildConfig.DATABASE_VERSION),
-      jobIntervalMillis: Long = DEFAULT_JOB_INTERVAL
-  ) {
-    storageType.setup()
-        .also {
-          this.storageType = storageType
-          storeUuidAndRemoteUrlToPreferences(context, userUniqueIdentifier, url)
+    @Volatile
+    private lateinit var storageType: RemoteLogsStorage
+    @Volatile
+    private lateinit var settingsStore: SettingsStore
+
+    /**
+     * Method to initialise the remote logging library.
+     * This method should be called before calling any other methods.
+     *
+     * @param url The remote url to send the logs to.
+     * API 28 & above require `https://` scheme. See https://developer.android.com/training/articles/security-config#CleartextTrafficPermitted for more info.
+     * @param logsStore The storage type where logs are stored.
+     * @param jobInterval The time period after which log upload job should be re-run.
+     */
+    fun initialize(
+            context: Context,
+            url: String,
+            userUniqueIdentifier: String,
+            logsStore: RemoteLogsStorage = SqliteRemoteLogsStorage(context, BuildConfig.DATABASE_NAME, BuildConfig.DATABASE_VERSION),
+            jobInterval: Duration = DEFAULT_JOB_INTERVAL
+    ) {
+        initializeSettingsStore(context, userUniqueIdentifier, url)
+        initializeLogsStore(logsStore, jobInterval, context)
+    }
+
+    /**
+     * Method to free up any resources used by the library.
+     */
+    fun teardown() {
+        if (::storageType.isInitialized) {
+            storageType.teardown()
+        } else {
+            reportUninitializedPropertyAccessError()
         }
-        .also { schedulePeriodicJob(storageType, jobIntervalMillis, context) }
-  }
 
-  /**
-   * Method to free up any resources used by the library.
-   */
-  fun teardown() {
-    if (::storageType.isInitialized) {
-      storageType.teardown()
-    }
-  }
-
-  /**
-   * Verbose remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun v(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.VERBOSE), tag, message, throwable)
-  }
-
-  /**
-   * Debug remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun d(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.DEBUG), tag, message, throwable)
-  }
-
-  /**
-   * Info remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun i(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.INFO), tag, message, throwable)
-  }
-
-  /**
-   * Warning remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun w(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.WARN), tag, message, throwable)
-  }
-
-  /**
-   * Error remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun e(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.ERROR), tag, message, throwable)
-  }
-
-
-  /**
-   * Assert remote log.
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun a(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(Log.ASSERT), tag, message, throwable)
-  }
-
-  /**
-   * What a Terrible Failure ¯\_(ツ)_/¯
-   *
-   * @throws IllegalStateException if [storageType] is uninitialized.
-   */
-  fun wtf(tag: String, message: String, throwable: Throwable? = null) {
-    check(::storageType.isInitialized)
-    storageType.insertLog(getLogPriorityLevel(WTF), tag, message, throwable)
-  }
-
-  fun setUserIdentifier(context: Context, userIdentifier: String) {
-    PreferenceManager
-        .getDefaultSharedPreferences(context)
-        .edit()
-        .putString(REMOTE_LOGGER_USER_UUID, userIdentifier)
-        .apply()
-  }
-
-  private fun storeUuidAndRemoteUrlToPreferences(context: Context, userUniqueIdentifier: String, url: String) {
-    PreferenceManager
-        .getDefaultSharedPreferences(context)
-        .edit()
-        .putString(REMOTE_LOGGER_USER_UUID, userUniqueIdentifier)
-        .putString(REMOTE_LOGGER_URL, url)
-        .apply()
-  }
-
-  private fun schedulePeriodicJob(storageType: RemoteLogsStorage, jobIntervalMillis: Long, context: Context) {
-    val periodicTaskTag = "REMOTE-LOGGER-PERIODIC-JOB"
-
-    val callback = SmartScheduler.JobScheduledCallback { jobContext, _ ->
-      RemoteJobExecutor.execute(
-          PreferenceManager.getDefaultSharedPreferences(jobContext).getString(REMOTE_LOGGER_URL, "")
-              ?: "",
-          storageType
-      )
+        if (::settingsStore.isInitialized) {
+            settingsStore.clear()
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
     }
 
-    val job = Builder(1, callback, Type.JOB_TYPE_PERIODIC_TASK, periodicTaskTag)
-        .setPeriodic(jobIntervalMillis)
-        .setRequiredNetworkType(NetworkType.NETWORK_TYPE_CONNECTED)
-        .build()
-
-    val jobCreatedSuccessfully = SmartScheduler.getInstance(context)
-        .addJob(job)
-
-    if (!jobCreatedSuccessfully) {
-      Log.e("RemoteLogger", "Job creation failed, your logs will not be synced.", null)
+    /**
+     * Verbose remote log.
+     */
+    fun v(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.VERBOSE), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
     }
-  }
 
-  private fun getLogPriorityLevel(messageLogLevel: Int): String =
-      when (messageLogLevel) {
-        Log.VERBOSE -> "VERBOSE"
-        Log.DEBUG   -> "DEBUG"
-        Log.INFO    -> "INFO"
-        Log.WARN    -> "WARN"
-        Log.ERROR   -> "ERROR"
-        Log.ASSERT  -> "ASSERT"
-        WTF         -> "WTF"
+    /**
+     * Debug remote log.
+     */
+    fun d(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.DEBUG), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
 
-        else -> "UNKNOWN"
-      }
+    /**
+     * Info remote log.
+     */
+    fun i(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.INFO), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
+
+    /**
+     * Warning remote log.
+     */
+    fun w(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.WARN), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
+
+    /**
+     * Error remote log.
+     */
+    fun e(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.ERROR), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
+
+
+    /**
+     * Assert remote log.
+     */
+    fun a(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(Log.ASSERT), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
+
+    /**
+     * What a Terrible Failure ¯\_(ツ)_/¯
+     */
+    fun wtf(tag: String, message: String, throwable: Throwable? = null) {
+        if (::storageType.isInitialized) {
+            storageType.insertLog(getLogPriorityLevel(WTF), tag, message, throwable)
+        } else {
+            reportUninitializedPropertyAccessError()
+        }
+    }
+
+    fun setUserIdentifier(userIdentifier: String) {
+        settingsStore.putString(REMOTE_LOGGER_USER_UUID, userIdentifier)
+    }
+
+    private fun initializeSettingsStore(context: Context, userUniqueIdentifier: String, url: String) {
+        if (!::settingsStore.isInitialized) {
+            synchronized(SettingsStore::class) {
+                this.settingsStore = SettingsStoreImpl(context)
+                storeUuidAndRemoteUrl(userUniqueIdentifier, url)
+            }
+        }
+    }
+
+    private fun initializeLogsStore(logsStore: RemoteLogsStorage, jobInterval: Duration, context: Context) {
+        if (!::storageType.isInitialized) {
+            synchronized(RemoteLogsStorage::class) {
+                logsStore.setup().also {
+                    this.storageType = logsStore
+                    schedulePeriodicJob(
+                            logsStore,
+                            jobInterval.unit.toMillis(jobInterval.time),
+                            context
+                    )
+                }
+            }
+        }
+    }
+
+    private fun reportUninitializedPropertyAccessError() {
+        Log.e(
+                "Remote Logger",
+                "Log Store not Initialized",
+                Exception("Remote Logger: Log Store not Initialized")
+        )
+    }
+
+    private fun storeUuidAndRemoteUrl(userUniqueIdentifier: String, url: String) {
+        settingsStore.putString(REMOTE_LOGGER_USER_UUID, userUniqueIdentifier)
+        settingsStore.putString(REMOTE_LOGGER_URL, url)
+    }
+
+    private fun schedulePeriodicJob(storageType: RemoteLogsStorage, jobInterval: Long, context: Context) {
+        val periodicTaskTag = "REMOTE-LOGGER-PERIODIC-JOB"
+
+        val callback = SmartScheduler.JobScheduledCallback { _, _ ->
+            RemoteJobExecutor.execute(
+                    settingsStore.getString(REMOTE_LOGGER_URL, ""),
+                    storageType
+            )
+        }
+
+        val job = Builder(1, callback, Type.JOB_TYPE_PERIODIC_TASK, periodicTaskTag)
+                .setPeriodic(jobInterval)
+                .setRequiredNetworkType(NetworkType.NETWORK_TYPE_CONNECTED)
+                .build()
+
+        val jobCreatedSuccessfully = SmartScheduler
+                .getInstance(context)
+                .addJob(job)
+
+        if (!jobCreatedSuccessfully) {
+            Log.e("RemoteLogger", "Job creation failed, your logs will not be synced.")
+        }
+    }
+
+    private fun getLogPriorityLevel(messageLogLevel: Int): String =
+            when (messageLogLevel) {
+                Log.VERBOSE -> "VERBOSE"
+                Log.DEBUG -> "DEBUG"
+                Log.INFO -> "INFO"
+                Log.WARN -> "WARN"
+                Log.ERROR -> "ERROR"
+                Log.ASSERT -> "ASSERT"
+                WTF -> "WTF"
+
+                else -> "UNKNOWN"
+            }
 }
+
+data class Duration(
+        val time: Long,
+        val unit: TimeUnit
+)
