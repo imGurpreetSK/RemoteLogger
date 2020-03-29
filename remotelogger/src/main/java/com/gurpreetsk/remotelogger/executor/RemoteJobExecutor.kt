@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gurpreetsk.remotelogger
+package com.gurpreetsk.remotelogger.executor
 
 import com.gurpreetsk.remotelogger.internal.RemoteLog
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo
+import com.gurpreetsk.remotelogger.storage.RemoteLogsStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

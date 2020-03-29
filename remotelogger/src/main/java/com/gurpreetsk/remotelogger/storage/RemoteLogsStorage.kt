@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gurpreetsk.remotelogger
+package com.gurpreetsk.remotelogger.storage
 
 import com.gurpreetsk.remotelogger.internal.RemoteLog
 

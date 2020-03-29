@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gurpreetsk.remotelogger
+package com.gurpreetsk.remotelogger.storage
 
 import android.content.ContentValues
 import android.content.Context
@@ -23,6 +23,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
+import com.gurpreetsk.remotelogger.BuildConfig
+import com.gurpreetsk.remotelogger.REMOTE_LOGGER_USER_UUID
 import com.gurpreetsk.remotelogger.internal.RemoteLog
 import com.gurpreetsk.remotelogger.internal.logError
 import com.gurpreetsk.remotelogger.internal.logInfo

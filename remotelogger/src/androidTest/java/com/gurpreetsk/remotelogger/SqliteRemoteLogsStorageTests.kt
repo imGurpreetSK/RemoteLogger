@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.gurpreetsk.remotelogger.SqliteRemoteLogsStorageTests.Column.*
 import com.gurpreetsk.remotelogger.internal.RemoteLog
+import com.gurpreetsk.remotelogger.storage.SqliteRemoteLogsStorage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
