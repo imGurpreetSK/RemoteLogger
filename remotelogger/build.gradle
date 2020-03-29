@@ -3,77 +3,53 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
+apply from: "../gradle/dependencies.gradle"
+apply from: "../gradle/publish.gradle"
+apply from: '../gradle/bintray.gradle'
+
 android {
-  compileSdkVersion 28
+    compileSdkVersion 29
 
-  defaultConfig {
-    minSdkVersion 14
-    targetSdkVersion 28
-    versionCode 1
-    versionName "0.1.0-preview"
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 29
+        versionCode 1
+        versionName "0.1.0-preview"
 
-    buildConfigField "int", "DATABASE_VERSION", "1"
-    buildConfigField "String", "DATABASE_NAME", "\"RemoteLoggerDb\""
+        buildConfigField "int", "DATABASE_VERSION", "1"
+        buildConfigField "String", "DATABASE_NAME", "\"RemoteLoggerDb\""
 
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-  }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-  // Coroutines
-  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1"
+    // Coroutines
+    implementation libraries.coroutinesCore
 
-  // Kotlin
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // Smart Scheduler. Size: 151 KB
+    implementation libraries.smartScheduler
 
-  // Smart Scheduler. Size: 151 KB
-  implementation 'io.hypertrack:smart-scheduler:0.0.13'
+    // Unit testing dependencies
+    testImplementation testing.junit
+    testImplementation testing.truth
+    testImplementation testing.mockito
 
-  // Unit testing dependencies
-  testImplementation "junit:junit:4.12"
-  testImplementation "com.google.truth:truth:0.42"
-  testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
-
-  // Android testing dependencies
-  androidTestImplementation "com.google.truth:truth:0.42"
-  androidTestImplementation "com.android.support.test:runner:1.0.2"
+    // Android testing dependencies
+    androidTestImplementation testing.truth
+    androidTestImplementation testing.testRunner
 }
-
-ext {
-  bintrayRepo = 'RemoteLogger'
-  bintrayName = 'remotelogger'
-
-  publishedGroupId = 'com.gurpreetsk'
-  libraryName      = 'remotelogger'
-  artifact         = 'remotelogger'
-
-  libraryDescription = 'A simple android library to push logs to a remote server.'
-
-  siteUrl = 'https://github.com/gurpreetsk95/remotelogger'
-  gitUrl  = 'https://github.com/gurpreetsk95/remotelogger.git'
-
-  libraryVersion = '0.1.0-preview'
-
-  developerId    = 'gurpreetsk95'
-  developerName  = 'Gurpreet Singh'
-  developerEmail = 'gurpreetsk@hotmail.com'
-
-  licenseName = 'The Apache Software License, Version 2.0'
-  licenseUrl  = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-  allLicenses = ["Apache-2.0"]
-}
-
-apply from: '../gradle/bintray.gradle'
